@@ -13,7 +13,7 @@ import java.util.Set;
 @Configuration("ore_trader.config")
 public class OreTraderConfig {
   @Option("ore_trader.config.enabled")
-  public boolean ENABLED = false;
+  public boolean ENABLED = true;
 
   @Option("ore_trader.config.ores")
   @Dropdown(options = Ores.class, multi = true)
