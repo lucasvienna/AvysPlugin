@@ -6,7 +6,8 @@ import eu.darkbot.api.config.annotations.Number;
 import eu.darkbot.api.config.annotations.Option;
 import eu.darkbot.api.config.annotations.Visibility;
 import eu.darkbot.api.managers.OreAPI;
-import java.util.EnumSet;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Configuration("ore_trader.config")
@@ -16,7 +17,7 @@ public class OreTraderConfig {
 
   @Option("ore_trader.config.ores")
   @Dropdown(options = Ores.class, multi = true)
-  public Set<OreAPI.Ore> ORES = EnumSet.allOf(OreAPI.Ore.class);
+  public Set<OreAPI.Ore> ORES = new HashSet<>(Ores.ORES);
 
   @Option("ore_trader.config.map")
   @Dropdown(options = Maps.class)
