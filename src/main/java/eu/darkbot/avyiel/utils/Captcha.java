@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class Captcha {
-  private static final List<String> CAPTCHA_BOXES =
-      List.of("POISON_PUSAT_BOX_BLACK", "BONUS_BOX_RED");
+
+  private static final List<String> CAPTCHA_BOXES = List.of("POISON_PUSAT_BOX_BLACK", "BONUS_BOX_RED");
 
   /**
    * Checks for an active captcha challenge.
