@@ -4,6 +4,7 @@ out/*
 /target
 /test
 /out
-dependency-reduced-pom.xml
+/build
 /*.jar
+/.gradle
 *.iml
