@@ -6,12 +6,12 @@ import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
 import eu.darkbot.util.ArrayUtils;
-import lombok.AllArgsConstructor;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.val;
 
 @AllArgsConstructor
 public class Pathfinder {
@@ -42,11 +42,11 @@ public class Pathfinder {
 
   /** Finds the closes base map with a refinery. */
   public Optional<GameMap> findRefineryMap() {
-    var factionId = hero.getEntityInfo().getFaction().ordinal();
+    val factionId = hero.getEntityInfo().getFaction().ordinal();
     if (factionId == 0 || factionId == 4) return Optional.empty(); // should never happen
 
-    var currentMap = hero.getMap();
-    var currentMapName = currentMap.getName();
+    val currentMap = hero.getMap();
+    val currentMapName = currentMap.getName();
     String HOME = factionId + "-1";
     String OUTPOST = factionId + "-8";
     String NEUTRAL = "5-2";
@@ -73,7 +73,7 @@ public class Pathfinder {
 
   /** Tries to find the best map. If not possible, defaults to the faction's home. */
   public GameMap getRefineryMap() {
-    var faction = hero.getEntityInfo().getFaction();
+    val faction = hero.getEntityInfo().getFaction();
     BaseMap map = BaseMap.PIRATE;
     switch (faction) {
       case MMO:
@@ -91,7 +91,7 @@ public class Pathfinder {
 
   /** Finds the closes {@link eu.darkbot.api.game.entities.Station.Refinery} in the current map. */
   public Optional<Station.Refinery> findRefinery() {
-    var bases = this.entities.getStations();
+    val bases = this.entities.getStations();
     return bases.stream()
         .filter(Objects::nonNull)
         .filter(b -> b instanceof Station.Refinery && b.getLocationInfo().isInitialized())
@@ -104,7 +104,7 @@ public class Pathfinder {
    * Hero}'s {@link eu.darkbot.api.game.other.EntityInfo.Faction Faction}.
    */
   private boolean isFactionMap() {
-    var factionId = hero.getEntityInfo().getFaction().ordinal();
+    val factionId = hero.getEntityInfo().getFaction().ordinal();
     if (factionId == 0 || factionId == 4) return false;
     return hero.getMap().getName().startsWith(factionId + "-");
   }

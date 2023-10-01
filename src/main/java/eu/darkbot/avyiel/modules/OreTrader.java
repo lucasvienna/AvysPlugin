@@ -24,6 +24,8 @@ import eu.darkbot.avyiel.utils.Pathfinder;
 import eu.darkbot.avyiel.utils.VerifierChecker;
 import eu.darkbot.shared.modules.TemporalModule;
 import eu.darkbot.shared.utils.MapTraveler;
+import lombok.val;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -80,7 +82,8 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
 
     // Ensure that the verifier is from this plugin and properly signed by yourself. If it isn't,
     // fail with a security exception.
-    if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners())) throw new SecurityException();
+    if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
+      throw new SecurityException();
     if (!auth.requireDonor()) throw new SecurityException();
 
     this.bot = bot;
@@ -107,7 +110,7 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
 
   @Override
   public String getStatus() {
-    var message = "Ore Trader | " + status.message;
+    String message = "Ore Trader | " + status.message;
     if (status == Status.NAVIGATING_BASE) message += " | Sell Map: " + targetMap.getName();
     return message;
   }
@@ -135,17 +138,6 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
     super.goBack();
   }
 
-  private void tickModule() {
-    if (hero.hasPet()) pet.setEnabled(false);
-    hero.setRoamMode();
-
-    if (targetMap == null) targetMap = pathfinder.getRefineryMap();
-    if (!navigateToTargetMap()) return;
-
-    var refinery = pathfinder.findRefinery();
-    refinery.ifPresent(this::navigateAndSell);
-  }
-
   private boolean shouldEnableModule() {
     if (!config.ENABLED) return false;
 
@@ -160,43 +152,15 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
     if (bot.getModule() != this) bot.setModule(this);
   }
 
-  /** Prevent cases where auto-refining happens while flying to the Refinery. */
-  private boolean shouldBailOut() {
-    return !triedSelling && (hasCargoDecreased() || stuckInGate());
-  }
+  private void tickModule() {
+    if (hero.hasPet()) pet.setEnabled(false);
+    hero.setRoamMode();
 
-  /** Indicates that the current cargo is far from the max cargo. */
-  private boolean hasCargoDecreased() {
-    return stats.getCargo() < stats.getMaxCargo() - 100;
-  }
+    if (targetMap == null) targetMap = pathfinder.getRefineryMap();
+    if (!navigateToTargetMap()) return;
 
-  /**
-   * Indicates that the {@link HeroAPI Hero} is not in the LoW gate and an exit {@link Portal}
-   * cannot be found.
-   */
-  private boolean stuckInGate() {
-    return hero.getMap().isGG() && !hero.getMap().getName().equals("LoW") && exitPortal == null;
-  }
-
-  /** Weird condition where we'll be at the refinery but cannot sell. */
-  private boolean sellButtonsBugged() {
-    return stats.getCargo() >= stats.getMaxCargo()
-        && ores.canSellOres()
-        && sellTimeout <= System.currentTimeMillis();
-  }
-
-  private boolean hasGateExit() {
-    exitPortal =
-        entities.getPortals().stream()
-            .filter(Objects::nonNull)
-            .filter(
-                p ->
-                    !(p.getTargetMap()
-                        .map(gm -> !gm.isGG())
-                        .orElse(p.getPortalType().getId() == 1)))
-            .min(Comparator.comparingDouble(p -> p.getLocationInfo().distanceTo(hero)))
-            .orElse(null);
-    return exitPortal != null;
+    val refinery = pathfinder.findRefinery();
+    refinery.ifPresent(this::navigateAndSell);
   }
 
   /** Navigates to the target map. If already there, returns true. Otherwise, false. */
@@ -234,6 +198,43 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
 
       sellNextOre();
     }
+  }
+
+  /** Prevent cases where auto-refining happens while flying to the Refinery. */
+  private boolean shouldBailOut() {
+    return !triedSelling && (hasCargoDecreased() || stuckInGate());
+  }
+
+  /** Indicates that the current cargo is far from the max cargo. */
+  private boolean hasCargoDecreased() {
+    return stats.getCargo() < stats.getMaxCargo() - 100;
+  }
+
+  /** Hero is not in the LoW gate and an exit {@link Portal} cannot be found. */
+  private boolean stuckInGate() {
+    return hero.getMap().isGG() && !hero.getMap().getName().equals("LoW") && exitPortal == null;
+  }
+
+  /** Weird condition where we'll be at the refinery but cannot sell. */
+  private boolean sellButtonsBugged() {
+    return stats.getCargo() >= stats.getMaxCargo()
+        && ores.canSellOres()
+        && System.currentTimeMillis() > sellTimeout;
+  }
+
+  /** Finds a Portal that does not lead to a GG. */
+  private boolean hasGateExit() {
+    exitPortal =
+        entities.getPortals().stream()
+            .filter(Objects::nonNull)
+            .filter(
+                p ->
+                    !(p.getTargetMap()
+                        .map(gm -> !gm.isGG())
+                        .orElse(p.getPortalType().getId() == 1)))
+            .min(Comparator.comparingDouble(p -> p.getLocationInfo().distanceTo(hero)))
+            .orElse(null);
+    return exitPortal != null;
   }
 
   private void sellNextOre() {
