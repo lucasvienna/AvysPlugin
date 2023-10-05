@@ -122,7 +122,10 @@ public class OreTrader extends TemporalModule implements Behavior, Configurable<
 
   @Override
   public void onTickModule() {
-    if (shouldBailOut()) goBack();
+    if (shouldBailOut()) {
+	    goBack();
+	    return;
+    }
 
     tickModule();
 
